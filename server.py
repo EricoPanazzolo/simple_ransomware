@@ -64,8 +64,8 @@ def execute_remote_command(target_ip):
         print(f"Error removing key: {e}")
     
     # Key    
-    os.mkdir("targets")
     if  "thekey.key" in os.listdir():
+        os.mkdir("targets")
         os.system(f"mv thekey.key ./targets/{target_ip}_key")
         print(f"Key moved to ./targets/{target_ip}_key")
     else:
