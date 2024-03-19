@@ -1,0 +1,29 @@
+FROM python:3.9-slim
+
+RUN apt-get update -y && apt-get install -y openssh-server -y sudo -y
+RUN pip install paramiko && pip install cryptography
+RUN apt-get install -y iputils-ping -y
+RUN apt-get install iproute2 -y
+RUN apt-get install nano -y
+RUN apt-get install sshpass -y
+RUN apt-get install wget -y
+
+# Adicionar o usuário
+RUN useradd -m -s /bin/bash labredes && \
+    echo "labredes:labredes" | chpasswd && \
+    echo "labredes ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers
+
+# Copiar o script de ataque
+COPY encrypt.py /home/labredes/encrypt.py
+COPY server.py /home/labredes/server.py
+
+# Expor a porta 22 para SSH
+EXPOSE 22
+
+# Configurar o SSH
+RUN echo 'root:labredes' | chpasswd
+RUN mkdir /var/run/sshd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Comando para rodar o comando de IP ao acessar o container
+CMD ["/bin/bash", "-c", "ip a s eth0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1 && /usr/sbin/sshd -D"]

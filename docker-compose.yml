@@ -1,0 +1,24 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile_server
+    ports:
+      - "2222:22" # Mapear a porta 2222 do host para a porta 22 do container
+    networks:
+      - ransomware_network
+    working_dir: /home/labredes
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile_client
+    networks:
+      - ransomware_network
+    working_dir: /home/labredes
+
+networks:
+  ransomware_network:

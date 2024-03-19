@@ -1,0 +1,37 @@
+# Dockerfile_client
+FROM python:3.9-slim
+
+RUN apt-get update -y && apt-get install openssh-server -y sudo -y
+RUN apt-get install -y iputils-ping -y
+RUN apt-get install iproute2 -y
+RUN apt-get install nano -y
+
+# Adicionar o usuário
+RUN useradd -m -s /bin/bash labredes && \
+    echo "labredes:labredes" | chpasswd && \
+    echo "labredes ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers
+
+RUN echo "minhas senhas" > /home/labredes/senhas.txt
+RUN mkdir /home/labredes/docs
+RUN echo "passear com o cachorro" > /home/labredes/docs/doc1.txt
+RUN chown labredes:labredes /home/labredes/senhas.txt
+RUN chown labredes:labredes /home/labredes/docs/doc1.txt
+
+# Copiar o script
+COPY client.py /home/labredes/client.py
+RUN chown labredes:labredes /home/labredes/client.py
+
+# Expor a porta 22 para SSH
+EXPOSE 22
+
+# Configurar o SSH
+RUN echo 'root:labredes' | chpasswd
+RUN mkdir /var/run/sshd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Comando para iniciar o SSH
+CMD ["/usr/sbin/sshd", "-D"]
+
+# Definir o usuário e diretório de trabalho padrão
+# USER labredes
+# WORKDIR /home/labredes
